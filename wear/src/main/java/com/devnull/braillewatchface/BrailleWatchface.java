@@ -1,11 +1,12 @@
 package com.devnull.braillewatchface;
 
-import android.app.Activity;
+//import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
@@ -14,9 +15,10 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class BrailleWatchface extends Activity {
+public class BrailleWatchface extends WatchFaceActivity {
 
-    private TextView mTime, mBattery;
+    private TextView mTime, mBTime;
+    private Typeface BrailleTypeface;
 
     private final static IntentFilter INTENT_FILTER;
     static {
@@ -26,7 +28,7 @@ public class BrailleWatchface extends Activity {
         INTENT_FILTER.addAction(Intent.ACTION_TIME_CHANGED);
     }
 
-    private final String TIME_FORMAT_DISPLAYED = "KK:mm a";
+    private final String TIME_FORMAT_DISPLAYED = "KK:mm";
 
     private BroadcastReceiver mTimeInfoReceiver = new BroadcastReceiver(){
         @Override
@@ -35,28 +37,24 @@ public class BrailleWatchface extends Activity {
         }
     };
 
-    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+    private BroadcastReceiver mBTimeInfoReceiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context arg0, Intent intent) {
-            mBattery.setText(String.valueOf(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0) + "%"));
+            mBTime.setText(new SimpleDateFormat(TIME_FORMAT_DISPLAYED).format(Calendar.getInstance().getTime()));
         }
     };
 
-    /*
     @Override
     public void onScreenDim() {
         mTime.setTextColor(Color.WHITE);
-        mBattery.setTextColor(Color.WHITE);
+        mBTime.setTextColor(Color.WHITE);
     }
-    */
 
-    /*
     @Override
     public void onScreenAwake() {
         mTime.setTextColor(Color.RED);
-        mBattery.setTextColor(Color.RED);
+        mBTime.setTextColor(Color.RED);
     }
-    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +65,14 @@ public class BrailleWatchface extends Activity {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 mTime = (TextView) stub.findViewById(R.id.watch_time);
-                mTime.setTextColor(Color.RED);
-                mBattery = (TextView) stub.findViewById(R.id.watch_battery);
-                mBattery.setTextColor(Color.RED);
+                mTime.setTextColor(Color.WHITE);
+                BrailleTypeface = Typeface.createFromAsset(getAssets(), "fonts/BRAILLE.ttf");
+                mBTime = (TextView) stub.findViewById(R.id.watch_btime);
+                mBTime.setTextColor(Color.WHITE);
+                mBTime.setTypeface(BrailleTypeface);
                 mTimeInfoReceiver.onReceive(BrailleWatchface.this, null);
                 registerReceiver(mTimeInfoReceiver, INTENT_FILTER);
-                registerReceiver(mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                registerReceiver(mBTimeInfoReceiver, INTENT_FILTER);
             }
         });
     }
@@ -81,6 +81,6 @@ public class BrailleWatchface extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mTimeInfoReceiver);
-        unregisterReceiver(mBatInfoReceiver);
+        unregisterReceiver(mBTimeInfoReceiver);
     }
 }
