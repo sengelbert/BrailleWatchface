@@ -1,6 +1,6 @@
 package com.devnull.braillewatchface;
 
-//import android.app.Activity;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,15 +10,19 @@ import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class BrailleWatchface extends WatchFaceActivity {
+public class BrailleWatchface extends Activity {
 
     private TextView mTime, mBTime;
     private Typeface BrailleTypeface;
+    private RelativeLayout WatchLayout;
+    private ImageView WatchBackground;
 
     private final static IntentFilter INTENT_FILTER;
     static {
@@ -28,7 +32,7 @@ public class BrailleWatchface extends WatchFaceActivity {
         INTENT_FILTER.addAction(Intent.ACTION_TIME_CHANGED);
     }
 
-    private final String TIME_FORMAT_DISPLAYED = "KK:mm";
+    private final String TIME_FORMAT_DISPLAYED = "hh:mm";
 
     private BroadcastReceiver mTimeInfoReceiver = new BroadcastReceiver(){
         @Override
@@ -44,17 +48,6 @@ public class BrailleWatchface extends WatchFaceActivity {
         }
     };
 
-    @Override
-    public void onScreenDim() {
-        mTime.setTextColor(Color.WHITE);
-        mBTime.setTextColor(Color.WHITE);
-    }
-
-    @Override
-    public void onScreenAwake() {
-        mTime.setTextColor(Color.RED);
-        mBTime.setTextColor(Color.RED);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +66,28 @@ public class BrailleWatchface extends WatchFaceActivity {
                 mTimeInfoReceiver.onReceive(BrailleWatchface.this, null);
                 registerReceiver(mTimeInfoReceiver, INTENT_FILTER);
                 registerReceiver(mBTimeInfoReceiver, INTENT_FILTER);
+                WatchBackground = (ImageView) stub.findViewById(R.id.watch_background);
+                WatchBackground.setBackgroundColor(Color.RED);
+
             }
         });
+    }
+
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        WatchBackground.setBackgroundColor(Color.BLACK);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //mBTime.setTextColor(Color.BLUE);
+        //WatchBackground.setBackgroundColor(Color.RED);
+
     }
 
     @Override
@@ -83,4 +96,5 @@ public class BrailleWatchface extends WatchFaceActivity {
         unregisterReceiver(mTimeInfoReceiver);
         unregisterReceiver(mBTimeInfoReceiver);
     }
+
 }
